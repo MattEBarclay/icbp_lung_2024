@@ -1,0 +1,162 @@
+---
+title: "ICBP lung cancer - appendix"
+format: 
+  docx: 
+    reference-doc: custom-reference-doc.docx
+output-file: "icbp_lung_appdx_2025-03-05.docx"
+---
+
+```{r}
+#| label: data-prep
+#| include: false
+
+source('an0_dataset_processing.R')
+source('an1_table1.R')
+source('an2_table2.R')
+source('an3_fig1_overall_meta.R')
+source('an4_fig2_treatment_age_stage.R')
+source('an5_fig3_treatment_sex_stage.R')
+source('an6a_treatment_cumulative_ctry.R')
+source('an6b_treatment_cumulative_jdns.R')
+source('an7_vs_surgery.R')
+source('an8_vs_radio_chemo.R')
+
+# plot exporting is done in the main qmd file.
+
+```
+
+# Appendix 1. Additional treatment plots and tables.
+
+
+###  Appendix 1 Figure 1. Proportion of lung cancer patients in each jurisdiction who received chemotherapy (top) or radiotherapy (bottom) treatment, by stage at diagnosis.
+![](results/figure1_appendix_lung_meta.png) 
+
+
+###  Appendix 1 Figure 1. Time-to-treatment for Canadian jurisdictions.
+![](results/figure4b_cumulative_jdn_canada.png) 
+
+###  Appendix 1 Figure 2. Time-to-treatment for Australian jurisdictions.
+![](results/figure4b_cumulative_jdn_australia.png) 
+
+###  Appendix 1 Figure 3. Time-to-treatment for UK jurisdictions.
+![](results/figure4b_cumulative_jdn_uk.png) 
+
+###  Appendix 1 Figure 4. Time-to-treatment for Norway.
+![](results/figure4b_cumulative_jdn_norway.png) 
+
+
+###  Appendix 1 Figure 5. Stage-specific scatter plot of jurisdictional three-year net survival for NSCLC against use of chemotherapy and radiotherapy for any lung cancer.
+![](results/figure7b_trt_vs_surv_stagespec.png) 
+
+
+###  Appendix 1 Table 1. Pearson's correlation coefficients for pairwise comparisons of treatment use and net survival, both overall (five-years) and stage-specific (three-years). This analysis is not adequately powered to detect reasonable correlations; any statistically significant correlations are likely to be overestimates, while failure to detect a correlation does not allow us to draw conclusions about the likely direction or strength of the true correlation.
+```{r}
+#| label: appdx1_tab1
+#| echo: false
+#| results: asis
+
+rbind(
+    readRDS("results/corr_trt.RDS"),
+    readRDS("results/corr_trt.RDS"),
+    readRDS("results/corr_surv.RDS")
+  ) |>
+  mutate(stage = case_when(
+    stage == "All" ~ "All stages",
+    stage == "1 or L" ~ "Stage 1 or L",
+    stage == "2"      ~ "Stage 2",
+    stage == "3 or R" ~ "Stage 3 or R",
+    stage == "4 or D" ~ "Stage 4 or D",
+    TRUE ~ stage
+  )) |>
+  gt() |>
+  cols_merge(
+    columns = c(conf.low, conf.high),
+    pattern = "({1}, {2})"
+  ) |>
+  cols_label(
+    compare = "Comparison",
+    stage = "Stage",
+    year = "Survival year",
+    estimate = "Pearson's R",
+    conf.low = "(95% CI)",
+    p.value = "p"
+  ) |>
+  fmt_number(
+    columns = c(estimate, conf.low, conf.high),
+    decimals = 2
+  ) |>
+  fmt_number(
+    columns = c(p.value),
+    decimals = 3
+  ) |>
+  saveRDS("results/z_appdxtable_correlations.RDS")
+
+readRDS("results/z_appdxtable_correlations.RDS") 
+
+```
+
+# Appendix 2. Data tables.
+
+### Appendix 2 Table 1. Jurisdictional treatment counts used to produce Figure 1 and Table 3.
+
+```{r}
+#| label: appdx2_tab1
+#| echo: false
+#| results: asis
+
+readRDS("results/z_appdxtable_figure1_lung_meta.RDS") 
+```
+
+{{< pagebreak >}}
+
+### Appendix 2 Table 2. Age-specific jurisdictional treatment counts used to produce Figure 2.
+```{r}
+#| label: appdx2_tab2
+#| echo: false
+#| results: asis
+
+readRDS("results/z_appdxtable_figure2_age_stage.RDS") 
+```
+
+{{< pagebreak >}}
+
+### Appendix 2 Table 3. Sex-specific jurisdictional treatment counts used to produce Figure 3.
+```{r}
+#| label: appdx2_tab3
+#| echo: false
+#| results: asis
+
+readRDS("results/z_appdxtable_figure3_sex_stage.RDS") 
+```
+
+{{< pagebreak >}}
+
+
+### Appendix 2 Table 4. Key centiles of time-to-treatment aggregated to country-level, specific cuts of Figure 4.
+```{r}
+#| label: appdx2_tab4
+#| echo: false
+#| results: asis
+
+readRDS("results/z_appdxtable_figure4a_cumulative_ctry.RDS") 
+```
+
+{{< pagebreak >}}
+
+### Appendix 2 Table 5. Key centiles of time-to-treatment at jurisdiction-level, specific cuts of Appendix 1 Figures 1-4.
+```{r}
+#| label: appdx2_tab5
+#| echo: false
+#| results: asis
+
+readRDS("results/z_appdxtable_figure4b_cumulative_jdn.RDS") 
+```
+
+
+```{r}
+#| label: clean-up environment
+#| echo: false
+#| results: asis
+
+rm(list = ls())
+```

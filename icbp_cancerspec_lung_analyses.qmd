@@ -1,0 +1,180 @@
+---
+title: "ICBP lung cancer - tables and figures"
+format: 
+  docx: 
+    reference-doc: custom-reference-doc.docx
+output-file: "icbp_lung_tables_figures_2025-03-05.docx"
+---
+
+```{r}
+#| label: data-prep
+#| include: false
+
+source('an0_dataset_processing.R')
+source('an1_table1.R')
+source('an2_table2.R')
+source('an3_fig1_overall_meta.R')
+source('an4_fig2_treatment_age_stage.R')
+source('an5_fig3_treatment_sex_stage.R')
+source('an6a_treatment_cumulative_ctry.R')
+source('an6b_treatment_cumulative_jdns.R')
+source('an7_vs_surgery.R')
+source('an8_vs_radio_chemo.R')
+source('an9_survival_vs_treatment.R')
+
+# Function to load saved plot data and export to desired format
+export_plots <- function(filetype = "pdf") {
+  
+  # enter plot name and dimensions
+  fig1   <- tibble(plot = "figure1_lung_meta", x = 15, y = 10)
+  fig1a  <- tibble(plot = "figure1_appendix_lung_meta", x = 15, y = 10)
+  fig2   <- tibble(plot = "figure2_age_stage", x = 27, y = 16)
+  fig3   <- tibble(plot = "figure3_sex_stage", x = 15, y = 10)
+  fig4a  <- tibble(plot = "figure4a_cumulative_ctry", x = 27, y = 16)
+  fig4b1 <- tibble(plot = "figure4b_cumulative_jdn_australia", x = 27, y = 16)
+  fig4b2 <- tibble(plot = "figure4b_cumulative_jdn_canada", x = 27, y = 16)
+  fig4b3 <- tibble(plot = "figure4b_cumulative_jdn_uk", x = 27, y = 16)
+  fig4b4 <- tibble(plot = "figure4b_cumulative_jdn_norway", x = 27, y = 16)
+  fig5   <- tibble(plot = "figure5_vs_surgery", x = 15, y = 10)
+  fig6   <- tibble(plot = "figure6_vs_chemo_radio", x = 15, y = 7)
+  fig7a  <- tibble(plot = "figure7a_trt_vs_surv_all", x = 15, y = 7)
+  fig7b  <- tibble(plot = "figure7b_trt_vs_surv_stagespec", x = 10, y = 20)
+  
+  plot_details <- rbind(fig1, fig1a, fig2, fig3, fig4a, fig4b1, fig4b2, fig4b3, fig4b4, fig5, fig6, fig7a, fig7b)
+  
+  # loop over plots and export
+  for (a_plot in plot_details |> select(plot) |> pull() ) {
+    plot_y <- plot_details |> 
+      filter(plot == a_plot) |> 
+      select(y) |> 
+      pull()
+    
+    plot_x <- plot_details |> 
+      filter(plot == a_plot) |> 
+      select(x) |> 
+      pull()
+    
+    to_save <- paste0("results/", a_plot, ".", filetype)
+    to_read <- paste0("results/", a_plot, ".RDS")
+    
+    plot_file <- readRDS(to_read)
+    ggsave(to_save,
+           plot = plot_file,
+           width = plot_x,
+           height = plot_y,
+           units = "cm")
+  }
+   
+}
+export_plots(filetype = "pdf")
+export_plots(filetype = "png")
+
+```
+
+###  Table 1. Sample description (by jurisdiction, sex, age group, stage group, diagnosis year)
+
+
+```{r}
+#| label: the_table1
+#| echo: false
+#| results: asis
+
+readRDS("results/table1.RDS") 
+```
+
+{{< pagebreak >}}
+
+### Table 2. Distribution of stage at diagnosis for lung cancer in jurisdictions using TNM (A) or SEER (B) stage*
+
+#### A
+
+```{r}
+#| label: analysis1a_table
+#| echo: false
+#| results: asis
+
+readRDS("results/table2A_TNM.RDS")
+
+```
+
+#### B
+
+```{r}
+#| label: analysis1b_table
+#| echo: false
+#| results: asis
+
+readRDS("results/table2B_SEER.RDS")
+
+```
+
+
+{{< pagebreak >}}
+
+#### Table 3. Pooled estimates and 95% prediction intervals for the proportion of lung cancer patients who receive chemotherapy or radiotherapy, both for all patients and for those with recorded stage 1-3 or stage 4 cancer.
+
+```{r}
+#| label: meta_table
+#| echo: false
+#| results: asis
+
+readRDS("results/table3_overall_meta.RDS")
+
+```
+
+
+{{< pagebreak >}}
+
+
+### Figure 1. Proportion of lung cancer patients in each jurisdiction who received chemotherapy (top) or radiotherapy (bottom) treatment, both overall (left), and for stages 1-3 or localised-regional (middle), or stage 4 or distant (right). Grey diamonds show the pooled estimate from a random-effects meta-analysis, with the widest point being the central estimate, the edges of the diamond representing 95% confidence intervals, and the wider grey lines representing 95% prediction intervals.
+
+![](results/figure1_lung_meta.png) 
+
+{{< pagebreak >}}
+
+### Figure 2. Proportion of patients treated with chemotherapy (top) and radiotherapy (bottom) by age, for all stages (left), non-advanced stage (middle), and advanced stage (right). Coloured lines show jurisdictional results. Dashed lines show 95% CIs. Grey lines show results for all other jurisdictions for ease of comparisons.
+
+![](results/figure2_age_stage.png) 
+
+{{< pagebreak >}}
+
+### Figure 3. Proportion of patients treated with chemotherapy (top) and radiotherapy (bottom), by sex 
+
+![](results/figure3_sex_stage.png) 
+
+{{< pagebreak >}}
+
+### Figure 4. Cumulative   percent of patients in each country who had received chemotherapy or radiotherapy treatment, by elapsed time since diagnosis, for all stages, stages 1-3 (or localised/regional), or stage 4 (or distant).
+Stage-specific results for Australia are based on New South Wales only.
+
+![](results/figure4a_cumulative_ctry.png) 
+
+
+{{< pagebreak >}}
+
+### Figure 5 (A-left, B-right). Scatter plot of jurisdictional use of surgery vs chemotherapy and radiotherapy for a subset of jurisdictions. Circles show jurisdiction-specific use, all lung cancer patients. Data relating to surgery use do not always align to study period for chemotherapy or radiotherapy use, or population basis (see footnote). Pearson’s r for surgery vs chemotherapy = 0.75 (95% CI -0.15, 0.97); Pearson’s r for surgery vs chemotherapy = 0.60 (-0.42, 0.95)
+
+![](results/figure5_vs_surgery.png)
+
+
+{{< pagebreak >}}
+
+### Figure 6. Scatter plot of jurisdictional use of radiotherapy vs chemotherapy, for all stages, stages 1-3 (or localised/regional), or stage 4 (or distant).
+
+![](results/figure6_vs_chemo_radio.png) 
+
+
+### Figure 7. Scatter plot of jurisdictional five-year net survival against use of chemotherapy, radiotherapy and surgery.
+
+![](results/figure7a_trt_vs_surv_all.png) 
+
+
+
+
+```{r}
+#| label: clean-up environment
+#| echo: false
+#| results: asis
+
+rm(list = ls())
+```
